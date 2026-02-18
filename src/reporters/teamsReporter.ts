@@ -294,19 +294,19 @@ export default class TeamsReporter implements Reporter {
       },
     ];
 
-    // Add visual chart showing test distribution
-    const chartUrl = this.generateChartUrl();
-    if (chartUrl) {
-      sections.push({
-        activityTitle: '📊 Test Distribution',
-        activitySubtitle: 'Visual breakdown of test results',
-        images: [
-          {
-            image: chartUrl,
-          },
-        ],
-      });
-    }
+    // // Add visual chart showing test distribution
+    // const chartUrl = this.generateChartUrl();
+    // if (chartUrl) {
+    //   sections.push({
+    //     activityTitle: '📊 Test Distribution',
+    //     activitySubtitle: 'Visual breakdown of test results',
+    //     images: [
+    //       {
+    //         image: chartUrl,
+    //       },
+    //     ],
+    //   });
+    // }
 
 
     // Add CI/CD metadata if available
@@ -455,16 +455,6 @@ export default class TeamsReporter implements Reporter {
         '@type': 'OpenUri',
         name: '📊 View Report',
         targets: [{ os: 'default', uri: process.env.PLAYWRIGHT_REPORT_URL }],
-      });
-    }
-
-    // Add link to CI job if available
-    if (process.env.GITHUB_ACTIONS && process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_RUN_ID) {
-      const jobUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
-      actions.push({
-        '@type': 'OpenUri',
-        name: '🔗 View CI Job',
-        targets: [{ os: 'default', uri: jobUrl }],
       });
     }
 

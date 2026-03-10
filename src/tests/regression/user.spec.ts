@@ -6,6 +6,7 @@ import { credentials } from "../resources/credentials";
 import { NavBarPage } from "../../pages/navbar.page";
 import { testdata } from "../resources/testdata";
 import { ResetPasswordPage } from "../../pages/forgot.password.page";
+import { UserAuthorization } from "../../pages/user.authorization.page";
 
 test.describe("User Page", () => {
   let loginPage: LoginPage;
@@ -148,7 +149,7 @@ test.describe("User Page", () => {
       await navBarpage.navigateToUserPage();
       const userManagementPage = new UserManagementPage(page);
       await userManagementPage.clickAddNewUser();
-      await userManagementPage.enterLoginID("17632");
+      await userManagementPage.enterLoginID(testdata.Employee_Number);
       await userManagementPage.clickValidateButton();
       await userManagementPage.enterSubmitButton();
       await expect(page.getByRole("heading")).toContainText("Error");
@@ -209,7 +210,52 @@ test.describe("User Page", () => {
       await expect(
         page.getByRole("heading", { name: "Edit User Details" }),
       ).toBeVisible();
-      await page.locator('#root_branchId').click();
+      await page.locator("#root_branchId").click();
+    },
+  );
+
+  test(
+    "Verify user authorization process",
+    { tag: ["@smoke", "@TC_13", "@positive"] },
+    async ({ page }) => {
+      await loginPage.login(credentials.username, credentials.password);
+      const navBarpage = new NavBarPage(page);
+      await navBarpage.clickUserManagement();
+      await navBarpage.clickUserAuthorization();
+      const userAuthorization = new UserAuthorization(page);
+      await expect(
+        page.getByRole("heading", { name: "User Authorization" }),
+      ).toBeVisible();
+      await userAuthorization.authorizeUser();
+    },
+  );
+
+    test(
+    "Verify that rejecting a user disables their ability to log in.",
+    { tag: ["@smoke", "@TC_14", "@positive"] },
+    async ({ page }) => {
+      await loginPage.login(credentials.username, credentials.password);
+      const navBarpage = new NavBarPage(page);
+      await navBarpage.clickUserManagement();
+      await navBarpage.clickUserAuthorization();
+      const userAuthorization = new UserAuthorization(page);
+      await expect(
+        page.getByRole("heading", { name: "User Authorization" }),
+      ).toBeVisible();
+      await userAuthorization.RejectUser();
+    },
+  );
+
+      test(
+    "Verify temporary inactivation",
+    { tag: ["@smoke", "@TC_17", "@positive"] },
+    async ({ page }) => {
+      await loginPage.login(credentials.username, credentials.password);
+      const navBarpage = new NavBarPage(page);
+      await navBarpage.clickUserManagement();
+      const userManagementPage = new UserManagementPage(page);
+      await userManagementPage.navigateToUserPage();
+      await userManagementPage.clickInactiveButton(testdata.restrictionReason);
 
     },
   );

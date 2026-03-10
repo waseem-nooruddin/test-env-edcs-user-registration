@@ -1,7 +1,7 @@
 import { Page, Locator } from "@playwright/test";
 
 export class UserManagementPage {
-  constructor(private readonly page: Page) { }
+  constructor(private readonly page: Page) {}
 
   async clickUserManagement(): Promise<void> {
     await this.page.getByRole("button", { name: "User Management" }).click();
@@ -25,15 +25,12 @@ export class UserManagementPage {
 
   async enterUserRoleId(): Promise<void> {
     await this.page.locator("#root_userRoleId").click();
-
   }
   async selectUserRoleId(RoleId: string): Promise<void> {
     await this.page
       .getByRole("option", { name: RoleId })
       .waitFor({ state: "visible" });
-    await this.page
-      .getByRole("option", { name: RoleId })
-      .click();
+    await this.page.getByRole("option", { name: RoleId }).click();
   }
 
   async enterSubmitButton(): Promise<void> {
@@ -50,5 +47,15 @@ export class UserManagementPage {
         "//nav[@aria-label='breadcrumb']//p[normalize-space()='User Management']",
       )
       .isVisible();
+  }
+
+  async clickInactiveButton(restrictionReason: string): Promise<void> {
+    await this.page.getByRole("button", { name: "Inactive" }).first().click();
+    await this.page.locator("#root_isRestrictionPermanent").click();
+    await this.page
+      .locator('li[role="option"]', { hasText: "Permanent" })
+      .click();
+    await this.page.locator("#root_restrictionReason").fill(restrictionReason);
+    await this.page.getByRole("button", { name: "Inactivate" }).click();
   }
 }

@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { LoginPage } from "../../pages/login.page";
 import { credentials } from "../resources/credentials";
+import { testdata } from "../resources/testdata";
 
 test.describe("Login Tests", () => {
   let loginPage: LoginPage;
@@ -22,6 +23,36 @@ test.describe("Login Tests", () => {
     },
   );
 
+  //   test(
+  //   "Verify multiple location selection",
+  //   { tag: ["@regression", "@TC_2", "@positive"] },
+  //   async ({ page }) => {
+  //     await loginPage.login(credentials.credentialusername, credentials.credentialpassword);
+  //     await loginPage.SelectYourBranch(testdata.location);
+  //     await page.waitForLoadState("networkidle");
+  //     await expect(
+  //       page.locator("main").getByText("Dashboard", { exact: true }),
+  //     ).toBeVisible();
+  //   },
+  // );
+
+  test(
+    "Verify first-time login redirects to change password",
+    { tag: ["@regression", "@TC_3", "@positive"] },
+    async ({ page }) => {
+      await loginPage.login(
+        credentials.credentialusername,
+        credentials.credentialpassword,
+      );
+      await loginPage.loginWithchangePassword(
+        credentials.credentialpassword,
+        credentials.Newpassword,
+        credentials.New_password,
+      );
+      await page.waitForLoadState("networkidle");
+    },
+  );
+
   test(
     "Verify login with invalid User ID",
     { tag: ["@regression", "@TC_7", "@negative"] },
@@ -39,7 +70,7 @@ test.describe("Login Tests", () => {
       await loginPage.login(credentials.username, "invalid");
       await page.waitForLoadState("networkidle");
       await expect(page.getByRole("alert")).toContainText(
-        "AUTHENTICATION_FAILEDEntered credentials are invalid ",
+        "AUTHENTICATION_FAILEDEntered credentials are invalid",
       );
     },
   );
@@ -56,9 +87,22 @@ test.describe("Login Tests", () => {
     },
   );
 
+    test(
+    "Verify login with expired password",
+    { tag: ["@regression", "@TC_11", "@negative"] },
+    async ({ page }) => {
+      await loginPage.login(
+        credentials.expiredusername,
+        credentials.expiredpassword,
+      );
+      await page.waitForLoadState("networkidle");
+      await expect(page.getByText("Your password has expired")).toBeVisible();
+    },
+  );
+
   test(
     "Verify lockout after multiple failed attempts",
-    { tag: ["@regression", "@TC_15", "@negative"] },
+    { tag: ["@regression", "@TC_14", "@negative"] },
     async ({ page }) => {
       const maxAttempts = 3;
 
@@ -82,17 +126,22 @@ test.describe("Login Tests", () => {
   );
 
   test(
-    "Verify login with expired password",
-    { tag: ["@regression", "@TC_14", "@negative"] },
+    "Verify the login page UI",
+    { tag: ["@regression", "@TC_15", "@UI"] },
     async ({ page }) => {
-      await loginPage.login(
-        credentials.expiredusername,
-        credentials.expiredpassword,
-      );
-      await page.waitForLoadState("networkidle");
-      await expect(page.getByRole("dialog")).toContainText(
-        "Time to change your password",
-      );
+      await loginPage.loginPage("", "");
+
+      const loginContainer = page.locator("div.loginPage");
+
+      // Mask dynamic elements like footer, timestamps, or logos
+      const screenshotBuffer = await loginContainer.screenshot({
+        mask: [page.locator("footer"), page.locator("img.dynamicLogo")],
+      });
+
+      // Allow a small tolerance for minor pixel differences
+      expect(screenshotBuffer).toMatchSnapshot("loginPage.png", {
+        maxDiffPixelRatio: 0.02,
+      });
     },
   );
 });
